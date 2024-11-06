@@ -71,19 +71,28 @@ model.compile(optimizer=Adam(learning_rate=0.001),
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
+checkpointer = ModelCheckpoint(
+    filepath='RESNET50_model.weights.best.hdf5',  # Filepath to save the weights
+    monitor='val_loss',                           # Monitor validation loss
+    verbose=1,                                    # Print message when saving
+    save_best_only=True,                          # Only save the best weights
+    save_weights_only=True                        # Save only the weights, not the entire model
+)
+
 # Mulai training
 history = model.fit(
     train_generator,
     steps_per_epoch=train_generator.samples // train_generator.batch_size,
     validation_data=test_generator,
     validation_steps=test_generator.samples // test_generator.batch_size,
-    epochs=5  # Sesuaikan dengan kebutuhan
+    epochs=5,  # Sesuaikan dengan kebutuhan
+    callbacks=[checkpointer]  # Pass the callback here
 )
 
 # Simpan model hasil training
 model.save_weights('model_weights.h5')
 
 # Evaluasi performa model
-loss, accuracy = model.evaluate(val_ds)
+loss, accuracy = model.evaluate(test_generator)
 print(f"Validation Loss: {loss}")
 print(f"Validation Accuracy: {accuracy}")
